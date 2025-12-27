@@ -25,7 +25,7 @@
 | **Left Click** | Create a disturbance (pluck the string) |
 
 ### 2D Simulation
-> A ripple tank simulation. Light is positive pressure (Crest), Dark is negative (Trough).
+> A ripple tank simulation. **Teal** represents positive pressure (Crest), while **Orange** represents negative pressure (Trough).
 
 | Input | Action |
 | :--- | :--- |
