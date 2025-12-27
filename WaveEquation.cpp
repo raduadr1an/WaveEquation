@@ -6,32 +6,47 @@
 #include <limits>
 #include <vector>
 
-// 1D
-const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 800;
-const int NUM_POINTS = 800;
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+const unsigned int W1_WIDTH = 1280;
+const unsigned int W1_HEIGHT = 720;
+const int NUM_POINTS = 1280;
 const double C = 1.0;
 const double DX = 0.5;
 const double DT = 0.1;
 const double DAMPING = 0.9999;
 const float THICKNESS = 3.0f;
-const double MOUSE_VALUE = 700.0;
+const double MOUSE_VALUE = 720.0;
 
-// 2D
-const int GRID_W = 400;
-const int GRID_H = 400;
-const unsigned int WIN_W = 800;
-const unsigned int WIN_H = 800;
+const unsigned int WIN_W = 1280;
+const unsigned int WIN_H = 720;
+
+const int GRID_W = 640;
+const int GRID_H = 360;
 const double DAMPING2 = 0.995;
 
 sf::Vector2i getGridPos(sf::RenderWindow &window) {
   sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-  int x = (mousePos.x / (double)WIN_W) * GRID_W;
-  int y = (mousePos.y / (double)WIN_H) * GRID_H;
+  sf::Vector2u windowSize = window.getSize();
+
+  int x = (int)((mousePos.x / (double)windowSize.x) * GRID_W);
+  int y = (int)((mousePos.y / (double)windowSize.y) * GRID_H);
+
+  if (x < 0) x = 0;
+  if (x >= GRID_W) x = GRID_W - 1;
+  if (y < 0) y = 0;
+  if (y >= GRID_H) y = GRID_H - 1;
+
   return {x, y};
 }
 
 int main() {
+  #ifdef _WIN32
+  SetConsoleOutputCP(65001);
+  #endif
+
   bool showError = false;
 
   while (true) {
@@ -92,11 +107,11 @@ int main() {
 
     sf::RenderWindow window;
     if (decision == 1)
-      window.create(sf::VideoMode({WIDTH, HEIGHT}),
+      window.create(sf::VideoMode({W1_WIDTH, W1_HEIGHT}),
                     "1D Wave (Press Q to Menu, R to Reset)");
     else
       window.create(sf::VideoMode({WIN_W, WIN_H}),
-                    "2D Wave (Press Q to Menu, C to clear, R to Reset)");
+                    "2D Wave (Press Q to Menu, C to Clear, R to Reset)");
 
     window.setFramerateLimit(60);
 
@@ -132,9 +147,10 @@ int main() {
 
           if (const auto *mousePress =
                   event->getIf<sf::Event::MouseButtonPressed>()) {
-            int center = (mousePress->position.x / (double)WIDTH) * NUM_POINTS;
+            sf::Vector2u wSize = window.getSize();
+            int center = (int)((mousePress->position.x / (double)wSize.x) * NUM_POINTS);
+            
             int inputRadius = 15;
-
             for (int i = -inputRadius; i <= inputRadius; ++i) {
               int target = center + i;
               if (target > 1 && target < NUM_POINTS - 1) {
@@ -164,10 +180,10 @@ int main() {
         window.clear(sf::Color::Black);
 
         for (int i = 0; i < NUM_POINTS - 1; ++i) {
-          float x1 = (float)i / NUM_POINTS * WIDTH;
-          float y1 = (HEIGHT / 2.0f) - (float)u[i];
-          float x2 = (float)(i + 1) / NUM_POINTS * WIDTH;
-          float y2 = (HEIGHT / 2.0f) - (float)u[i + 1];
+          float x1 = (float)i / NUM_POINTS * W1_WIDTH;
+          float y1 = (W1_HEIGHT / 2.0f) - (float)u[i];
+          float x2 = (float)(i + 1) / NUM_POINTS * W1_WIDTH;
+          float y2 = (W1_HEIGHT / 2.0f) - (float)u[i + 1];
 
           sf::Vector2f p1(x1, y1);
           sf::Vector2f p2(x2, y2);
@@ -205,14 +221,15 @@ int main() {
           window.draw(joint);
         }
 
-        float lastX = (float)(NUM_POINTS - 1) / NUM_POINTS * WIDTH;
-        float lastY = (HEIGHT / 2.0f) - (float)u[NUM_POINTS - 1];
+        float lastX = (float)(NUM_POINTS - 1) / NUM_POINTS * W1_WIDTH;
+        float lastY = (W1_HEIGHT / 2.0f) - (float)u[NUM_POINTS - 1];
         joint.setPosition({lastX, lastY});
         window.draw(joint);
 
         window.display();
       }
-    } else {
+    } 
+    else {
       std::vector<double> u(GRID_W * GRID_H, 0.0);
       std::vector<double> u_prev(GRID_W * GRID_H, 0.0);
       std::vector<double> u_next(GRID_W * GRID_H, 0.0);
@@ -222,16 +239,25 @@ int main() {
       sf::Texture texture;
       if (!texture.resize({(unsigned int)GRID_W, (unsigned int)GRID_H}))
         return -1;
+      
       texture.setSmooth(true);
 
       sf::Sprite sprite(texture);
-      sprite.setScale({(float)WIN_W / GRID_W, (float)WIN_H / GRID_H});
+      
+      sf::Vector2u wSize = window.getSize();
+      sprite.setScale({(float)wSize.x / GRID_W, (float)wSize.y / GRID_H});
 
       while (window.isOpen()) {
         while (const auto event = window.pollEvent()) {
           if (event->is<sf::Event::Closed>()) {
             window.close();
             return 0;
+          }
+          
+          if (event->is<sf::Event::Resized>()) {
+              sf::Vector2u newSize = window.getSize();
+              sprite.setScale({(float)newSize.x / GRID_W, (float)newSize.y / GRID_H});
+              window.setView(sf::View(sf::FloatRect({0, 0}, {(float)newSize.x, (float)newSize.y})));
           }
 
           if (const auto *keyPress = event->getIf<sf::Event::KeyPressed>()) {
