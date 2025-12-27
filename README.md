@@ -11,6 +11,7 @@
 ## 🕹️ Controls
 
 ### General
+
 | Key | Action |
 | :--- | :--- |
 | **Q** | **Quit to Main Menu** |
@@ -18,12 +19,14 @@
 
 ### 1D Simulation
 > Visualize a wave traveling along a string.
+
 | Input | Action |
 | :--- | :--- |
 | **Left Click** | Create a disturbance (pluck the string) |
 
 ### 2D Simulation
 > A ripple tank simulation. Light is positive pressure (Crest), Dark is negative (Trough).
+
 | Input | Action |
 | :--- | :--- |
 | **Left Click** | Create a wave at mouse position |
