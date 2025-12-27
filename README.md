@@ -2,7 +2,7 @@
 
 > An interactive visualization of a Wave Equation in 1D and 2D environments. Built with C++ and SFML.
 
-![C++](https://img.shields.io/badge/C++-17-blue.svg?style=flat&logo=c%2B%2B)
+![C++](https://img.shields.io/badge/C++-20-blue.svg?style=flat&logo=c%2B%2B)
 ![SFML](https://img.shields.io/badge/SFML-3.0-green.svg?style=flat&logo=sfml)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)
 
